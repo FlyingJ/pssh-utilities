@@ -1,0 +1,3 @@
+VER=`lsb_release -r | awk '{print $NF}'`
+ARCH=`uname -m`
+echo "$VER, $ARCH"

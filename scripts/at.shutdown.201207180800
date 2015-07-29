@@ -1,0 +1,3 @@
+cat << END | at 08:00 July 18
+/sbin/shutdown -h now "System going down for scheduled power outage."
+END
