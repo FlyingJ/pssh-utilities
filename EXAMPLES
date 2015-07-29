@@ -1,0 +1,47 @@
+## getting things to pour out on-screen 
+
+# pssh --hosts lists/sws.list --user root --par 150 --timeout 40 --inline 'rpm -qa \*puppet\* \*augeas\* \*facter\*'
+
+## dumping output into directories 
+
+# pssh --hosts lists/sws.list --user root --par 150 --timeout 40 --outdir output/`date +"%Y%m%d%H%M%S"`.out --errdir output/`date +"%Y%m%d%H%M%S"`.err 'rpm -qa \*puppet\* \*augeas\* \*facter\*'
+
+## an example of running a more complex command
+
+# pssh --hosts ./busted.printers.list --user root --par 150 --timeout 40 --outdir cdf.remove.printers.out --errdir cdf.remove.printers.err 'for PRINTER in `lpstat -a | cut -d " " -f 1`; do lpadmin -x $PRINTER; done'
+
+## push a script as input and send to hosts
+
+# take a look at the script
+#[jason@rattlehead pssh]$ cat scripts/at.shutdown 
+#cat << END | at 08:00 July 18
+#/sbin/shutdown -h now "System going down for scheduled power outage."
+#END
+
+# cat scripts/at.shutdown | pssh --hosts lists/cdf.trailers.list --user root --par 150 --timeout 40 --send-input --outdir output/`date +"%Y%m%d%H%M%S"`.out --errdir output/`date +"%Y%m%d%H%M%S"`.err
+
+## pssh is, also, the awesome when it comes to here documents 
+## but be careful about local expansion of variables!
+
+# cat << EOF | pssh --hosts lists/sws.list --user root --par 150 --timeout 40 --send-input --outdir output/`date +"%Y%m%d%H%M%S"`.out --errdir output/`date +"%Y%m%d%H%M%S"`.err
+> uptime
+> who
+> route
+> EOF
+
+## yum transaction clean-up
+# find hosts with possibly incomplete transactions
+#
+# pssh --hosts lists/sws.list --user root --par 150 --timeout 40 --outdir output/`date +"%Y%m%d%H%M%S"`.out --errdir output/`date +"%Y%m%d%H%M%S"`.err 'ls -l /var/lib/yum/transaction-*'
+#
+# which directory was just generated?
+#
+# recent
+#
+# find hosts with transaction files
+#
+# egrep -an 'transaction' 20130328101828.out/* | awk -F: '{print $1}'
+
+## puppet test runs
+
+# pssh --hosts lists/puppet.test.list --user root --par 150 --timeout 600 --outdir puppet/`date +"%Y%m%d%H%M%S"`.out --errdir puppet/`date +"%Y%m%d%H%M%S"`.err '/root/bin/run_puppet --environment=jason --noop'
